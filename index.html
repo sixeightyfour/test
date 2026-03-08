@@ -26,20 +26,27 @@ body {
 
 const Graph = ForceGraph3D()(document.getElementById('graph'));
 
-fetch('graph_clean (1).json')
+fetch('graph.json')
   .then(res => res.json())
   .then(data => {
 
     const nodes = data.nodes.map(n => ({
       id: n.id,
-      x: (Math.random() - 0.5) * 1000,
-      y: (Math.random() - 0.5) * 1000,
-      z: (Math.random() - 0.5) * 1000
+      x: (Math.random() - 0.5) * 2000,
+      y: (Math.random() - 0.5) * 2000,
+      z: (Math.random() - 0.5) * 2000
     }));
 
     const links = data.links;
 
     Graph.graphData({ nodes, links });
+
+    // stronger physics for large graph
+    Graph.d3Force('charge').strength(-300);
+    Graph.d3Force('link').distance(120);
+
+    // pull camera back
+    Graph.cameraPosition({ z: 4000 });
 
   });
 
