@@ -15,6 +15,7 @@ body {
 }
 </style>
 
+<script src="https://unpkg.com/three"></script>
 <script src="https://unpkg.com/3d-force-graph"></script>
 </head>
 
@@ -36,11 +37,9 @@ fetch('graph_clean (1).json')
       z: (Math.random() - 0.5) * 8000
     }));
 
-    Graph.graphData({
-      nodes,
-      links: data.links
-    });
+    Graph.graphData({ nodes, links: data.links });
 
+    // more room between nodes
     Graph.d3Force('charge').strength(-800);
     Graph.d3Force('link').distance(300);
 
@@ -54,6 +53,7 @@ fetch('graph_clean (1).json')
 
     Graph.onEngineStop(() => {
 
+      // wait a bit more before exporting
       setTimeout(() => {
 
         const positions = Graph.graphData().nodes.map(n =>
@@ -77,5 +77,6 @@ fetch('graph_clean (1).json')
   });
 
 </script>
+
 </body>
 </html>
