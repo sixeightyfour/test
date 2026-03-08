@@ -39,7 +39,61 @@ fetch('graph_clean (1).json')
 
     const links = data.links;
 
-    Graph.graphData({ nodes, links });
+    Graph.graphData({ nodes, links });<script>
+
+const Graph = ForceGraph3D()(document.getElementById('graph'));
+
+fetch('graph_clean (1).json')
+  .then(res => res.json())
+  .then(data => {
+
+    const nodes = data.nodes.map(n => ({
+      id: n.id,
+      x: (Math.random() - 0.5) * 2000,
+      y: (Math.random() - 0.5) * 2000,
+      z: (Math.random() - 0.5) * 2000
+    }));
+
+    Graph.graphData({ nodes, links: data.links });
+
+    // more room between nodes
+    Graph.d3Force('charge').strength(-800);
+    Graph.d3Force('link').distance(300);
+
+    Graph.cooldownTicks(2000);
+    Graph.cooldownTime(15000);
+
+    Graph.d3Force('center', null);
+    Graph.d3VelocityDecay(0.3);
+
+    Graph.cameraPosition({ z: 8000 });
+
+    Graph.onEngineStop(() => {
+
+      // wait a bit more before exporting
+      setTimeout(() => {
+
+        const positions = Graph.graphData().nodes.map(n =>
+          `${n.id},${n.x},${n.y},${n.z}`
+        ).join("\n");
+
+        const blob = new Blob([positions], { type: "text/plain" });
+        const url = URL.createObjectURL(blob);
+
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "node_positions.txt";
+        a.click();
+
+        URL.revokeObjectURL(url);
+
+      }, 5000); // extra settle time
+
+    });
+
+  });
+
+</script>
     Graph.cooldownTicks(300);
 
     Graph.d3Force('charge').strength(-300);
