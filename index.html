@@ -15,7 +15,6 @@ body {
 }
 </style>
 
-<script src="https://unpkg.com/three"></script>
 <script src="https://unpkg.com/3d-force-graph"></script>
 </head>
 
@@ -37,26 +36,11 @@ fetch('graph_clean (1).json')
       z: (Math.random() - 0.5) * 2000
     }));
 
-    const links = data.links;
+    Graph.graphData({
+      nodes,
+      links: data.links
+    });
 
-    Graph.graphData({ nodes, links });<script>
-
-const Graph = ForceGraph3D()(document.getElementById('graph'));
-
-fetch('graph_clean (1).json')
-  .then(res => res.json())
-  .then(data => {
-
-    const nodes = data.nodes.map(n => ({
-      id: n.id,
-      x: (Math.random() - 0.5) * 2000,
-      y: (Math.random() - 0.5) * 2000,
-      z: (Math.random() - 0.5) * 2000
-    }));
-
-    Graph.graphData({ nodes, links: data.links });
-
-    // more room between nodes
     Graph.d3Force('charge').strength(-800);
     Graph.d3Force('link').distance(300);
 
@@ -70,7 +54,6 @@ fetch('graph_clean (1).json')
 
     Graph.onEngineStop(() => {
 
-      // wait a bit more before exporting
       setTimeout(() => {
 
         const positions = Graph.graphData().nodes.map(n =>
@@ -87,35 +70,8 @@ fetch('graph_clean (1).json')
 
         URL.revokeObjectURL(url);
 
-      }, 5000); // extra settle time
+      }, 5000);
 
-    });
-
-  });
-
-</script>
-    Graph.cooldownTicks(300);
-
-    Graph.d3Force('charge').strength(-300);
-    Graph.d3Force('link').distance(120);
-
-    Graph.cameraPosition({ z: 4000 });
-
-    // When simulation stops export positions
-    Graph.onEngineStop(() => {
-      const positions = Graph.graphData().nodes.map(n =>
-        `${n.id},${n.x},${n.y},${n.z}`
-      ).join("\n");
-
-      const blob = new Blob([positions], { type: "text/plain" });
-      const url = URL.createObjectURL(blob);
-
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "node_positions.txt";
-      a.click();
-
-      URL.revokeObjectURL(url);
     });
 
   });
