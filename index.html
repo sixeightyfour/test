@@ -2,13 +2,14 @@
 <html>
 <head>
 <meta charset="utf-8">
-<title>3D Graph</title>
+<title>Large 3D Graph</title>
 
 <style>
 body {
   margin: 0;
   overflow: hidden;
 }
+
 #graph {
   width: 100vw;
   height: 100vh;
@@ -27,56 +28,86 @@ body {
 const Graph = ForceGraph3D()(document.getElementById('graph'));
 
 fetch('graph_clean (1).json')
-  .then(res => res.json())
-  .then(data => {
+.then(res => res.json())
+.then(data => {
 
-    const nodes = data.nodes.map(n => ({
-      id: n.id,
-      x: (Math.random() - 0.5) * 8000,
-      y: (Math.random() - 0.5) * 8000,
-      z: (Math.random() - 0.5) * 8000
-    }));
+  // Spread initial nodes over large space
+  const nodes = data.nodes.map(n => ({
+    id: n.id,
+    x: (Math.random() - 0.5) * 8000,
+    y: (Math.random() - 0.5) * 8000,
+    z: (Math.random() - 0.5) * 8000
+  }));
 
-    Graph.graphData({ nodes, links: data.links });
+  const links = data.links;
 
-    // more room between nodes
-    Graph.d3Force('charge').strength(-800);
-    Graph.d3Force('link').distance(300);
+  Graph.graphData({ nodes, links });
 
-    Graph.cooldownTicks(2000);
-    Graph.cooldownTime(15000);
+  // Camera pulled far back
+  Graph.cameraPosition({ z: 12000 });
 
-    Graph.d3Force('center', null);
-    Graph.d3VelocityDecay(0.3);
+  // Faster node rendering (sprites instead of meshes)
+  Graph.nodeThreeObject(() => new THREE.Sprite(
+    new THREE.SpriteMaterial({ color: 0xffffff })
+  ));
 
-    Graph.cameraPosition({ z: 8000 });
+  Graph.nodeRelSize(2);
+  Graph.nodeOpacity(0.9);
 
-    Graph.onEngineStop(() => {
+  // Physics tuned for large graphs
+  Graph.d3Force('charge').strength(-900);
+  Graph.d3Force('link').distance(250);
 
-      // wait a bit more before exporting
-      setTimeout(() => {
+  // Prevent collapse to center
+  Graph.d3Force('center', null);
 
-        const positions = Graph.graphData().nodes.map(n =>
-          `${n.id},${n.x},${n.y},${n.z}`
-        ).join("\n");
+  // Stabilize movement
+  Graph.d3VelocityDecay(0.35);
 
-        const blob = new Blob([positions], { type: "text/plain" });
-        const url = URL.createObjectURL(blob);
+  // Keep physics running indefinitely
+  Graph.cooldownTicks(Infinity);
 
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = "node_positions.txt";
-        a.click();
+  // ----------------------------
+  // Save function
+  // ----------------------------
 
-        URL.revokeObjectURL(url);
+  function savePositions(filename="node_positions.txt") {
 
-      }, 5000);
+    const positions = Graph.graphData().nodes.map(n =>
+      `${n.id},${n.x},${n.y},${n.z}`
+    ).join("\n");
 
-    });
+    const blob = new Blob([positions], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
 
-  });
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    a.click();
+
+    URL.revokeObjectURL(url);
+
+    console.log("Saved node positions:", filename);
+  }
+
+  // ----------------------------
+  // Backup every 5 minutes
+  // ----------------------------
+
+  setInterval(() => {
+    savePositions("backup_positions.txt");
+  }, 300000); // 5 minutes
+
+  // ----------------------------
+  // Final save after 30 minutes
+  // ----------------------------
+
+  setTimeout(() => {
+    savePositions("final_positions.txt");
+  }, 1800000); // 30 minutes
+
+});
 
 </script>
-
 </body>
 </html>
