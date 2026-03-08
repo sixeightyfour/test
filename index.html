@@ -31,9 +31,9 @@ fetch('graph_clean (1).json')
 
     const nodes = data.nodes.map(n => ({
       id: n.id,
-      x: (Math.random() - 0.5) * 2000,
-      y: (Math.random() - 0.5) * 2000,
-      z: (Math.random() - 0.5) * 2000
+      x: (Math.random() - 0.5) * 8000,
+      y: (Math.random() - 0.5) * 8000,
+      z: (Math.random() - 0.5) * 8000
     }));
 
     Graph.graphData({
