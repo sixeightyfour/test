@@ -42,12 +42,27 @@ fetch('graph_clean (1).json')
     Graph.graphData({ nodes, links });
     Graph.cooldownTicks(300);
 
-    // stronger physics for large graph
     Graph.d3Force('charge').strength(-300);
     Graph.d3Force('link').distance(120);
 
-    // pull camera back
     Graph.cameraPosition({ z: 4000 });
+
+    // When simulation stops export positions
+    Graph.onEngineStop(() => {
+      const positions = Graph.graphData().nodes.map(n =>
+        `${n.id},${n.x},${n.y},${n.z}`
+      ).join("\n");
+
+      const blob = new Blob([positions], { type: "text/plain" });
+      const url = URL.createObjectURL(blob);
+
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "node_positions.txt";
+      a.click();
+
+      URL.revokeObjectURL(url);
+    });
 
   });
 
