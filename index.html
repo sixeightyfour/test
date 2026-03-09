@@ -62,13 +62,12 @@ fetch('graph_clean (1).json')
   Graph.nodeOpacity(0.9);
 
   // Physics tuning
-  Graph.d3Force('charge').strength(-2000);
-  Graph.d3Force('link').distance(400);
-  Graph.d3Force('center', null);
+  Graph.d3Force('charge').strength(-6000);
+  Graph.d3Force('link').distance(500);
 
-  Graph.d3VelocityDecay(0.15);
+  Graph.d3VelocityDecay(0.12);
+  Graph.d3AlphaDecay(0.005);
 
-  // Keep physics running indefinitely
   Graph.cooldownTicks(Infinity);
 
   // ----------------------------
