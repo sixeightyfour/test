@@ -64,6 +64,7 @@ fetch('graph_clean (1).json')
   // Physics tuning
   Graph.d3Force('charge').strength(-12000);
   Graph.d3Force('link').distance(800);
+  Graph.d3Force('link').strength(0.1);
 
   Graph.d3VelocityDecay(0.12);
   Graph.d3AlphaDecay(0.005);
