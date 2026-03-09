@@ -16,22 +16,27 @@ body {
 }
 </style>
 
-<script src="https://unpkg.com/three"></script>
+<!-- Correct Three.js build that exposes global THREE -->
+<script src="https://unpkg.com/three@0.150.1/build/three.min.js"></script>
+
+<!-- Force graph -->
 <script src="https://unpkg.com/3d-force-graph"></script>
+
 </head>
 
 <body>
+
 <div id="graph"></div>
 
 <script>
 
 const Graph = ForceGraph3D()(document.getElementById('graph'));
 
-fetch('graph_clean (1).json')
+fetch('graph_clean.json')
 .then(res => res.json())
 .then(data => {
 
-  // Spread initial nodes over large space
+  // Spread nodes randomly at start
   const nodes = data.nodes.map(n => ({
     id: n.id,
     x: (Math.random() - 0.5) * 8000,
@@ -43,35 +48,34 @@ fetch('graph_clean (1).json')
 
   Graph.graphData({ nodes, links });
 
-  // Camera pulled far back
+  // Pull camera back
   Graph.cameraPosition({ z: 12000 });
 
-  // Faster node rendering (sprites instead of meshes)
-  Graph.nodeThreeObject(() => new THREE.Sprite(
-    new THREE.SpriteMaterial({ color: 0xffffff })
-  ));
+  // Fast sprite nodes
+  Graph.nodeThreeObject(() =>
+    new THREE.Sprite(
+      new THREE.SpriteMaterial({ color: 0xffffff })
+    )
+  );
 
   Graph.nodeRelSize(2);
   Graph.nodeOpacity(0.9);
 
-  // Physics tuned for large graphs
+  // Physics tuning
   Graph.d3Force('charge').strength(-900);
   Graph.d3Force('link').distance(250);
-
-  // Prevent collapse to center
   Graph.d3Force('center', null);
 
-  // Stabilize movement
   Graph.d3VelocityDecay(0.35);
 
   // Keep physics running indefinitely
   Graph.cooldownTicks(Infinity);
 
   // ----------------------------
-  // Save function
+  // Save node positions
   // ----------------------------
 
-  function savePositions(filename="node_positions.txt") {
+  function savePositions(filename = "node_positions.txt") {
 
     const positions = Graph.graphData().nodes.map(n =>
       `${n.id},${n.x},${n.y},${n.z}`
@@ -90,24 +94,19 @@ fetch('graph_clean (1).json')
     console.log("Saved node positions:", filename);
   }
 
-  // ----------------------------
   // Backup every 5 minutes
-  // ----------------------------
-
   setInterval(() => {
     savePositions("backup_positions.txt");
-  }, 300000); // 5 minutes
+  }, 300000);
 
-  // ----------------------------
   // Final save after 30 minutes
-  // ----------------------------
-
   setTimeout(() => {
     savePositions("final_positions.txt");
-  }, 1800000); // 30 minutes
+  }, 1800000);
 
 });
 
 </script>
+
 </body>
 </html>
